@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API de Cursos — Painel Web</title>
+    <style>
+        :root {
+            --bg: #f4f6f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #16a34a;
+            --success-bg: #dcfce7;
+            --danger: #dc2626;
+            --danger-bg: #fee2e2;
+            --warning: #d97706;
+            --warning-bg: #fef3c7;
+            --radius: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 24px 16px 48px;
+        }
+
+        .container {
+            max-width: 1040px;
+            margin: 0 auto;
+            display: grid;
+            gap: 20px;
+        }
+
+        header {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        header p {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-top: 2px;
+        }
+
+        .health-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: #e2e8f0;
+            color: var(--text);
+        }
+
+        .badge.up {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .badge.down {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px 24px;
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--text);
+            background: #fff;
+            transition: border-color 0.15s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 74px;
+        }
+
+        .actions {
+            margin-top: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, opacity 0.15s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 0.82rem;
+        }
+
+        .btn-edit {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .btn-edit:hover {
+            background: #bfdbfe;
+        }
+
+        .btn-delete {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .btn-delete:hover {
+            background: #fecaca;
+        }
+
+        .alert {
+            display: none;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 14px;
+            border: 1px solid transparent;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert.success {
+            background: var(--success-bg);
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .alert.error {
+            background: var(--danger-bg);
+            color: #991b1b;
+            border-color: #fecaca;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .toolbar input {
+            max-width: 180px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 11px 10px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        th {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--muted);
+            background: #f8fafc;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .empty {
+            text-align: center;
+            color: var(--muted);
+            padding: 28px 12px;
+        }
+
+        pre {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 14px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
+        .meta-line {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div>
+            <h1>API de Cursos — Painel Web</h1>
+            <p>Front-end simples integrado ao Spring Boot, PostgreSQL e Spring Boot Actuator</p>
+        </div>
+        <div class="health-box">
+            <span id="healthBadge" class="badge"><span class="dot"></span>Actuator: verificando...</span>
+            <button type="button" class="btn-secondary btn-sm" onclick="verificarSaude()">Atualizar Health</button>
+        </div>
+    </header>
+
+    <section class="card">
+        <h2 id="formTitulo">Cadastrar Novo Curso</h2>
+        <div id="feedback" class="alert" role="alert"></div>
+
+        <form id="cursoForm">
+            <input type="hidden" id="cursoId">
+            <div class="form-grid">
+                <div class="field">
+                    <label for="nome">Nome do Curso *</label>
+                    <input type="text" id="nome" maxlength="120" placeholder="Ex.: Engenharia de Software" required>
+                </div>
+
+                <div class="field">
+                    <label for="cargaHoraria">Carga Horária (horas) *</label>
+                    <input type="number" id="cargaHoraria" min="1" step="1" placeholder="Ex.: 160" required>
+                </div>
+
+                <div class="field">
+                    <label for="modalidade">Modalidade *</label>
+                    <input type="text" id="modalidade" list="modalidadesList" maxlength="40" placeholder="Ex.: Presencial, EAD ou Hibrido" required>
+                    <datalist id="modalidadesList">
+                        <option value="Presencial"></option>
+                        <option value="EAD"></option>
+                        <option value="Hibrido"></option>
+                    </datalist>
+                </div>
+
+                <div class="field">
+                    <label for="valor">Valor (R$) *</label>
+                    <input type="number" id="valor" min="0" step="0.01" placeholder="Ex.: 1499.90" required>
+                </div>
+
+                <div class="field full">
+                    <label for="descricao">Descrição *</label>
+                    <textarea id="descricao" maxlength="500" placeholder="Resumo da ementa e objetivos do curso..." required></textarea>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" id="btnSalvar" class="btn-primary">Cadastrar Curso</button>
+                <button type="button" id="btnCancelar" class="btn-secondary" style="display:none;" onclick="cancelarEdicao()">Cancelar Edição</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>
+            <span>Cursos Cadastrados no Banco</span>
+            <span id="contadorCursos" style="font-size:0.85rem; color:var(--muted); font-weight:500;">0 registro(s)</span>
+        </h2>
+
+        <div class="toolbar">
+            <input type="number" id="buscaId" min="1" placeholder="Buscar por ID...">
+            <button type="button" class="btn-secondary" onclick="buscarPorId()">Buscar por ID</button>
+            <button type="button" class="btn-secondary" onclick="carregarCursos()">Listar Todos</button>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Carga Horária</th>
+                    <th>Modalidade</th>
+                    <th>Valor</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody id="tabelaCursos">
+                <tr>
+                    <td colspan="7" class="empty">Carregando cursos...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Última Resposta da API (JSON)</h2>
+        <div id="ultimaRequisicao" class="meta-line">Nenhuma requisição executada ainda.</div>
+        <pre id="jsonPreview">{}</pre>
+    </section>
+</div>
+
+<script>
+    const API_URL = '/cursos';
+    const cursosPorId = new Map();
+
+    const form = document.getElementById('cursoForm');
+    const cursoIdInput = document.getElementById('cursoId');
+    const nomeInput = document.getElementById('nome');
+    const descricaoInput = document.getElementById('descricao');
+    const cargaHorariaInput = document.getElementById('cargaHoraria');
+    const modalidadeInput = document.getElementById('modalidade');
+    const valorInput = document.getElementById('valor');
+    const formTitulo = document.getElementById('formTitulo');
+    const btnSalvar = document.getElementById('btnSalvar');
+    const btnCancelar = document.getElementById('btnCancelar');
+    const feedback = document.getElementById('feedback');
+    const tabelaCursos = document.getElementById('tabelaCursos');
+    const contadorCursos = document.getElementById('contadorCursos');
+    const healthBadge = document.getElementById('healthBadge');
+    const ultimaRequisicao = document.getElementById('ultimaRequisicao');
+    const jsonPreview = document.getElementById('jsonPreview');
+
+    function escapeHtml(texto) {
+        return String(texto ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function formatarValor(valor) {
+        const num = Number(valor);
+        if (Number.isNaN(num)) return '-';
+        return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function exibirFeedback(tipo, mensagem) {
+        feedback.className = `alert show ${tipo}`;
+        feedback.textContent = mensagem;
+    }
+
+    function limparFeedback() {
+        feedback.className = 'alert';
+        feedback.textContent = '';
+    }
+
+    function registrarResposta(metodo, url, status, dados) {
+        ultimaRequisicao.textContent = `${metodo} ${url} -> HTTP ${status}`;
+        jsonPreview.textContent = dados !== null && dados !== undefined
+            ? JSON.stringify(dados, null, 2)
+            : '(Sem corpo — 204 No Content)';
+    }
+
+    async function verificarSaude() {
+        try {
+            const resp = await fetch('/actuator/health');
+            const dados = await resp.json();
+            registrarResposta('GET', '/actuator/health', resp.status, dados);
+
+            if (resp.ok && dados.status === 'UP') {
+                healthBadge.className = 'badge up';
+                healthBadge.innerHTML = '<span class="dot"></span>Actuator: UP';
+            } else {
+                healthBadge.className = 'badge down';
+                healthBadge.innerHTML = `<span class="dot"></span>Actuator: ${escapeHtml(dados.status || 'DOWN')}`;
+            }
+        } catch (err) {
+            healthBadge.className = 'badge down';
+            healthBadge.innerHTML = '<span class="dot"></span>Actuator: OFFLINE';
+        }
+    }
+
+    function renderizarTabela(cursos) {
+        cursosPorId.clear();
+        cursos.forEach(c => cursosPorId.set(c.id, c));
+        contadorCursos.textContent = `${cursos.length} registro(s)`;
+
+        if (!cursos.length) {
+            tabelaCursos.innerHTML = '<tr><td colspan="7" class="empty">Nenhum curso cadastrado no banco ainda.</td></tr>';
+            return;
+        }
+
+        tabelaCursos.innerHTML = cursos.map(curso => `
+            <tr>
+                <td><strong>#${escapeHtml(curso.id)}</strong></td>
+                <td><strong>${escapeHtml(curso.nome)}</strong></td>
+                <td>${escapeHtml(curso.descricao)}</td>
+                <td>${escapeHtml(curso.cargaHoraria)}h</td>
+                <td>${escapeHtml(curso.modalidade)}</td>
+                <td>${formatarValor(curso.valor)}</td>
+                <td>
+                    <div class="row-actions">
+                        <button type="button" class="btn-edit btn-sm" onclick="iniciarEdicao(${Number(curso.id)})">Editar</button>
+                        <button type="button" class="btn-delete btn-sm" onclick="excluirCurso(${Number(curso.id)})">Excluir</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function carregarCursos() {
+        try {
+            const resp = await fetch(API_URL);
+            const dados = await resp.json();
+            registrarResposta('GET', API_URL, resp.status, dados);
+
+            if (!resp.ok) {
+                exibirFeedback('error', dados.mensagem || 'Erro ao listar cursos.');
+                return;
+            }
+            renderizarTabela(dados);
+        } catch (err) {
+            exibirFeedback('error', 'Nao foi possivel conectar a API.');
+        }
+    }
+
+    async function buscarPorId() {
+        const id = document.getElementById('buscaId').value.trim();
+        if (!id) {
+            carregarCursos();
+            return;
+        }
+
+        limparFeedback();
+        try {
+            const url = `${API_URL}/${encodeURIComponent(id)}`;
+            const resp = await fetch(url);
+            const dados = await resp.json();
+            registrarResposta('GET', url, resp.status, dados);
+
+            if (resp.ok) {
+                renderizarTabela([dados]);
+                exibirFeedback('success', `Curso #${dados.id} encontrado com sucesso.`);
+            } else {
+                renderizarTabela([]);
+                exibirFeedback('error', `HTTP ${resp.status}: ${dados.mensagem || 'Curso nao encontrado.'}`);
+            }
+        } catch (err) {
+            exibirFeedback('error', 'Erro de conexao ao buscar curso por ID.');
+        }
+    }
+
+    function iniciarEdicao(id) {
+        const curso = cursosPorId.get(id);
+        if (!curso) return;
+
+        limparFeedback();
+        cursoIdInput.value = curso.id;
+        nomeInput.value = curso.nome;
+        descricaoInput.value = curso.descricao;
+        cargaHorariaInput.value = curso.cargaHoraria;
+        modalidadeInput.value = curso.modalidade;
+        valorInput.value = curso.valor;
+
+        formTitulo.textContent = `Editando Curso #${curso.id}`;
+        btnSalvar.textContent = 'Salvar Alterações';
+        btnCancelar.style.display = 'inline-block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelarEdicao() {
+        form.reset();
+        cursoIdInput.value = '';
+        formTitulo.textContent = 'Cadastrar Novo Curso';
+        btnSalvar.textContent = 'Cadastrar Curso';
+        btnCancelar.style.display = 'none';
+    }
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        limparFeedback();
+
+        const id = cursoIdInput.value;
+        const payload = {
+            nome: nomeInput.value.trim(),
+            descricao: descricaoInput.value.trim(),
+            cargaHoraria: Number(cargaHorariaInput.value),
+            modalidade: modalidadeInput.value.trim(),
+            valor: Number(valorInput.value)
+        };
+
+        const metodo = id ? 'PUT' : 'POST';
+        const url = id ? `${API_URL}/${id}` : API_URL;
+
+        try {
+            const resp = await fetch(url, {
+                method: metodo,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const dados = await resp.json();
+            registrarResposta(metodo, url, resp.status, dados);
+
+            if (resp.ok) {
+                exibirFeedback(
+                    'success',
+                    id
+                        ? `Curso #${dados.id} atualizado com sucesso (HTTP ${resp.status}).`
+                        : `Curso #${dados.id} cadastrado com sucesso (HTTP ${resp.status}).`
+                );
+                cancelarEdicao();
+                await carregarCursos();
+            } else {
+                const detalhes = dados.detalhes && Object.keys(dados.detalhes).length
+                    ? ' | ' + Object.entries(dados.detalhes).map(([k, v]) => `${k}: ${v}`).join('; ')
+                    : '';
+                exibirFeedback('error', `HTTP ${resp.status}: ${dados.mensagem || 'Erro ao salvar curso.'}${detalhes}`);
+            }
+        } catch (err) {
+            exibirFeedback('error', 'Erro de conexao ao enviar dados para a API.');
+        }
+    });
+
+    async function excluirCurso(id) {
+        if (!confirm(`Deseja realmente excluir o curso #${id}?`)) {
+            return;
+        }
+
+        limparFeedback();
+        const url = `${API_URL}/${id}`;
+        try {
+            const resp = await fetch(url, { method: 'DELETE' });
+            if (resp.status === 204) {
+                registrarResposta('DELETE', url, resp.status, null);
+                exibirFeedback('success', `Curso #${id} removido com sucesso (HTTP 204).`);
+                if (cursoIdInput.value === String(id)) {
+                    cancelarEdicao();
+                }
+                await carregarCursos();
+            } else {
+                const dados = await resp.json();
+                registrarResposta('DELETE', url, resp.status, dados);
+                exibirFeedback('error', `HTTP ${resp.status}: ${dados.mensagem || 'Erro ao excluir curso.'}`);
+            }
+        } catch (err) {
+            exibirFeedback('error', 'Erro de conexao ao excluir curso.');
+        }
+    }
+
+    // Inicializacao da pagina: verifica Actuator e carrega a lista de cursos do PostgreSQL
+    verificarSaude();
+    carregarCursos();
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.7</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>br.edu.nassau</groupId>
+    <artifactId>api-cursos</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>api-cursos</name>
+    <description>API REST de Cursos - Trabalho Individual Aulas 10 e 11 (Testes, Build JAR, Docker e Actuator) - UNINASSAU</description>
+
+    <properties>
+        <!-- Versao do Java usada na compilacao (deve ser compativel com a imagem base do Dockerfile: eclipse-temurin:21-jre) -->
+        <java.version>21</java.version>
+    </properties>
+
+    <dependencies>
+        <!-- Camada Web / API REST com servidor Tomcat embutido -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Persistencia ORM com Spring Data JPA / Hibernate -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- Validacao declarativa de entrada nos DTOs (@NotBlank, @Positive, etc.) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Observabilidade e monitoramento (Aula 11: endpoint GET /actuator/health) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Driver JDBC do PostgreSQL (necessario apenas em tempo de execucao) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Suite de testes automatizados (Aula 10: JUnit 5, Mockito e MockMvc) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Plugin responsavel por empacotar o Fat JAR executavel em target/api-cursos-1.0.0.jar -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- Mantem a saida dos testes limpa no Java 21+ ao carregar o agente do Mockito -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-XX:+EnableDynamicAgentLoading</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

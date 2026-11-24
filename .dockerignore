@@ -1,0 +1,26 @@
+# Impede que o contexto de build do Docker envie arquivos desnecessarios ou sensiveis
+.git
+.gitignore
+.gitattributes
+.env
+.env.*
+.idea
+*.iml
+.vscode
+.mvn
+mvnw
+mvnw.cmd
+src
+README.md
+compose.yml
+Dockerfile
+
+# Mantem apenas target/api-cursos-1.0.0.jar no contexto, ignorando artefatos intermediarios
+target/classes
+target/test-classes
+target/generated-sources
+target/generated-test-sources
+target/maven-archiver
+target/maven-status
+target/surefire-reports
+target/*.original

@@ -1,0 +1,13 @@
+# Garante portabilidade de quebras de linha entre Windows, Linux e macOS
+* text=auto
+
+# Scripts Unix/shell e arquivos Docker devem sempre usar LF (evita erro no ./mvnw em Linux/macOS)
+mvnw text eol=lf
+*.sh text eol=lf
+Dockerfile text eol=lf
+compose.yml text eol=lf
+
+# Scripts Windows devem manter CRLF
+mvnw.cmd text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf

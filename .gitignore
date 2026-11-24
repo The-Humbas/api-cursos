@@ -1,0 +1,23 @@
+# Artefatos gerados pelo build Maven (nunca versionar target/ no Git)
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Variaveis de ambiente locais com credenciais reais (nunca enviar senhas ao GitHub)
+.env
+.env.local
+.env.*.local
+
+# Arquivos de IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+
+# Logs e arquivos temporarios do sistema operacional
+*.log
+.DS_Store
+Thumbs.db

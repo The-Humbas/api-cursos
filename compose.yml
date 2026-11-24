@@ -1,0 +1,54 @@
+# ==============================================================================
+# Docker Compose - Orquestracao da API de Cursos + PostgreSQL (Aula 11)
+# Pre-requisitos antes de rodar "docker compose up --build":
+#   1. Copiar ".env.example" para ".env" e definir POSTGRES_PASSWORD
+#   2. Gerar o Fat JAR com ".\mvnw.cmd clean package" (Windows) ou "./mvnw clean package" (Linux/macOS)
+# ==============================================================================
+
+services:
+  # Servico 1: Banco de dados PostgreSQL 16
+  db:
+    image: postgres:16
+    container_name: api-cursos-db
+    environment:
+      # Variaveis lidas pela imagem oficial do PostgreSQL na inicializacao do banco.
+      # POSTGRES_PASSWORD e obrigatoria via arquivo .env ou ambiente (nenhuma senha fica fixa no repositorio).
+      POSTGRES_DB: ${POSTGRES_DB:-api_cursos}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env (copie .env.example para .env)}
+    ports:
+      # Porta parametrizavel no host para evitar conflito caso o avaliador tenha PostgreSQL local na 5432
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      # Associa o volume nomeado postgres_data ao diretorio interno de dados do PostgreSQL.
+      # Isso garante que os cursos cadastrados NAO sejam perdidos apos "docker compose down".
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # Verifica se o PostgreSQL ja esta pronto para aceitar conexoes SQL antes de subir a API
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Servico 2: API REST Spring Boot construida a partir do Dockerfile local
+  api:
+    build: .
+    container_name: api-cursos-app
+    ports:
+      # Mapeia porta da maquina host (esquerda) para porta 8080 do container (direita)
+      - "${API_PORT:-8080}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      # ATENCAO: Dentro do container da API, "localhost" aponta para o proprio container da API.
+      # Por isso usamos o nome do servico ("db") como host na rede interna do Docker Compose!
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-api_cursos}
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env (copie .env.example para .env)}
+    depends_on:
+      # Garante que o container do banco inicie e esteja saudavel antes de a API abrir conexao
+      db:
+        condition: service_healthy
+
+# Declaracao formal do volume gerenciado pelo Docker para persistencia do PostgreSQL
+volumes:
+  postgres_data:
